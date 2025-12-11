@@ -8,6 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Book } from 'src/domains/books/entities/book.entity';
+import { UserAggregate } from 'src/domains/users/domain/user.aggregate';
 
 @Entity({ name: 'users' })
 @Index('idx_users_email_unique', ['email'], { unique: true })
@@ -52,4 +53,31 @@ export class User {
 
   @OneToMany(() => Book, (book) => book.author)
   books: Book[];
+
+  toAggregate(): UserAggregate {
+    return UserAggregate.reconstitute({
+      id: this.id,
+      email: this.email,
+      passwordHash: this.passwordHash,
+      name: this.name,
+      avatarUrl: this.avatarUrl,
+      isBanned: !!this.isBanned,
+      role: this.role,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    });
+  }
+
+  static fromAggregate(agg: UserAggregate): User {
+    const e = new User();
+    const p = agg.toPersistence();
+    if (p.id) e.id = p.id;
+    e.email = p.email;
+    e.passwordHash = p.passwordHash;
+    e.name = p.name;
+    e.avatarUrl = p.avatarUrl;
+    e.isBanned = p.isBanned ? 1 : 0;
+    e.role = p.role;
+    return e;
+  }
 }
