@@ -4,9 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { CoreModule } from 'src/core/core.module';
 
 @Module({
   imports: [
+    CoreModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
