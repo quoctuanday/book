@@ -15,26 +15,34 @@ const USER_REPO = 'USER_REPO';
 export class UsersService {
   constructor(@Inject(USER_REPO) private readonly userRepo: IUserRepository) {}
 
-  async create(dto: {
+  async createUser(params: {
     email: string;
-    password: string;
+    passwordHash: string;
     name?: string;
-    avatarUrl?: string;
-    role?: any;
   }) {
-    const exists = await this.userRepo.existsByEmail(dto.email);
-    if (exists) throw new BadRequestException('Email already used');
+    const exists = await this.userRepo.existsByEmail(params.email);
+    if (exists) {
+      throw new BadRequestException('Email already exists');
+    }
 
-    const hash = await bcrypt.hash(dto.password, 10);
-    const agg = UserAggregate.createNew({
-      email: dto.email,
-      passwordHash: hash,
-      name: dto.name,
-      avatarUrl: dto.avatarUrl,
-      role: dto.role,
+    const user = UserAggregate.createNew({
+      email: params.email,
+      passwordHash: params.passwordHash,
+      name: params.name,
     });
-    const saved = await this.userRepo.save(agg);
-    return saved.toDTO();
+
+    const saved = await this.userRepo.save(user);
+    return saved;
+  }
+
+  async findByEmailForAuth(email: string): Promise<UserAggregate | null> {
+    return this.userRepo.findByEmail(email);
+  }
+  async verifyPassword(
+    user: UserAggregate,
+    plainPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(plainPassword, user['passwordHash']);
   }
 
   async getById(id: string) {

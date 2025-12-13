@@ -70,6 +70,9 @@ export class UserAggregate {
   get avatarUrl() {
     return this._avatarUrl;
   }
+  get passwordHash(): string {
+    return this._passwordHash;
+  }
   get isBanned() {
     return this._isBanned;
   }
