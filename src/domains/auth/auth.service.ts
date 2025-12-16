@@ -12,6 +12,7 @@ import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { UserAggregate } from 'src/domains/users/domain/user.aggregate';
 import { randomUUID } from 'crypto';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
@@ -116,5 +117,91 @@ export class AuthService {
   async logout(sub: string, sid: string) {
     await this.redis.del(`refresh:${sub}:${sid}`);
     return { message: 'Logged out' };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmailForAuth(email);
+
+    if (!user) return;
+
+    const tokenId = randomUUID();
+    const rawToken = randomUUID();
+    const hash = await bcrypt.hash(rawToken, 10);
+
+    const redisKey = `reset:${user.id}:${tokenId}`;
+
+    await this.redis.set(redisKey, hash, 'EX', 15 * 60);
+    console.log(this.config.get('NM_HOST'));
+
+    const transporter = nodemailer.createTransport({
+      host: this.config.get('NM_HOST'),
+      port: this.config.get('NM_PORT'),
+      secure: false,
+      auth: {
+        user: this.config.get('NM_USER'),
+        pass: this.config.get('NM_PASS'),
+      },
+    });
+    const resetLink = `localhost:${this.config.get(
+      'FE_PORT',
+    )}/api/auth/reset-password?token=${rawToken}`;
+    await transporter.sendMail({
+      from: '"Admin web doc truyen" <admin@ethereal.email>',
+      to: email,
+      subject: 'Reset Password ',
+      html: `
+              <p>Hi ${user.name ?? 'there'},</p>
+
+              <p>We received a request to reset your password.</p>
+
+              <p>
+                This link will expire in <b>15 minutes</b>:
+              </p>
+
+              <p>
+                <a href="${resetLink}" target="_blank">
+                  Reset your password
+                </a>
+              </p>
+
+              <p>If this was not you, please ignore this email.</p>
+
+              <p>
+                Thanks,<br/>
+                Admin Team
+              </p>
+            `,
+    });
+
+    return;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const keys = await this.redis.keys('reset:*');
+
+    for (const key of keys) {
+      const storedHash = await this.redis.get(key);
+      if (!storedHash) continue;
+
+      const match = await bcrypt.compare(token, storedHash);
+      if (!match) continue;
+
+      const userId = key.split(':')[1];
+
+      await this.redis.del(key);
+
+      const newHash = await bcrypt.hash(newPassword, 10);
+
+      await this.usersService.updatePassword(userId, newHash);
+
+      const refreshKeys = await this.redis.keys(`refresh:${userId}:*`);
+      if (refreshKeys.length) {
+        await this.redis.del(refreshKeys);
+      }
+
+      return;
+    }
+
+    throw new UnauthorizedException('Invalid or expired reset token');
   }
 }

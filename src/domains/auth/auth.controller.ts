@@ -9,8 +9,10 @@ import {
 import { Response, Request } from 'express';
 import { AuthService } from 'src/domains/auth/auth.service';
 import { Public } from 'src/domains/auth/decorators/public.decorator';
+import { ForgotPasswordDto } from 'src/domains/auth/dto/forgot-password.dto';
 import { LoginDto } from 'src/domains/auth/dto/login.dto';
 import { RegisterDto } from 'src/domains/auth/dto/register.dto';
+import { ResetPasswordDto } from 'src/domains/auth/dto/reset-password.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -68,5 +70,17 @@ export class AuthController {
     return {
       accessToken: tokens.accessToken,
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 }

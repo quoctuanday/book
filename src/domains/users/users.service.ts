@@ -52,6 +52,15 @@ export class UsersService {
     return bcrypt.compare(plainPassword, user['passwordHash']);
   }
 
+  async updatePassword(userId: string, passwordHash: string) {
+    const user = await this.userRepo.findById(userId);
+    if (!user) throw new NotFoundException();
+
+    user.changePassword(passwordHash);
+
+    await this.userRepo.save(user);
+  }
+
   async getById(id: string) {
     const user = await this.userRepo.findById(id);
     if (!user) throw new NotFoundException('User not found');
