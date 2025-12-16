@@ -38,6 +38,13 @@ export class UsersService {
   async findByEmailForAuth(email: string): Promise<UserAggregate | null> {
     return this.userRepo.findByEmail(email);
   }
+
+  async findByIdForAuth(id: string): Promise<UserAggregate> {
+    const user = await this.userRepo.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
   async verifyPassword(
     user: UserAggregate,
     plainPassword: string,

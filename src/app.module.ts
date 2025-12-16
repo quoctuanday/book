@@ -6,12 +6,14 @@ import { CoreModule } from 'src/core/core.module';
 import { UsersModule } from 'src/domains/users/users.module';
 import { DatabaseModule } from 'src/common/config/database/database.module';
 import { AuthModule } from 'src/domains/auth/auth.module';
+import { RedisModule } from 'src/common/config/redis/redis.module';
 
 @Module({
   imports: [
     CoreModule,
     AuthModule,
     UsersModule,
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
