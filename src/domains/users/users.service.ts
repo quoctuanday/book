@@ -61,6 +61,21 @@ export class UsersService {
     await this.userRepo.save(user);
   }
 
+  async updateProfile(
+    userId: string,
+    dto: { name?: string; avatarUrl?: string },
+  ) {
+    const user = await this.userRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.updateProfile(dto.name, dto.avatarUrl);
+
+    const saved = await this.userRepo.save(user);
+    return saved.toDTO();
+  }
+
   async getById(id: string) {
     const user = await this.userRepo.findById(id);
     if (!user) throw new NotFoundException('User not found');
