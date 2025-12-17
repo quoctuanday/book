@@ -27,4 +27,21 @@ export class GenresService {
 
     return saved.toDTO();
   }
+
+  async ensureExists(ids: string[]) {
+    const found = await this.genreRepo.findByIds(ids);
+    if (found.length !== ids.length) {
+      throw new BadRequestException('Some genres not found');
+    }
+  }
+
+  async findListByIds(ids: string[]) {
+    const genres = await this.genreRepo.findByIds(ids);
+
+    if (genres.length !== ids.length) {
+      throw new BadRequestException('Some genres do not exist');
+    }
+
+    return genres.map((g) => g.toDTO());
+  }
 }

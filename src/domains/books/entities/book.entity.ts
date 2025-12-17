@@ -6,15 +6,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   Index,
-  ManyToOne,
-  JoinColumn,
-  ManyToMany,
-  JoinTable,
-  OneToMany,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Genre } from '../../genre/entities/genre.entity';
-import { Chapter } from '../../chapters/entities/chapter.entity';
 
 @Entity({ name: 'books' })
 @Index('idx_books_slug', ['slug'], { unique: true })
@@ -56,19 +48,4 @@ export class Book {
 
   @Column({ name: 'author_id', type: 'char', length: 36, nullable: true })
   authorId?: string;
-
-  @ManyToOne(() => User, (u) => u.books, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'author_id' })
-  author?: User;
-
-  @ManyToMany(() => Genre, { cascade: false })
-  @JoinTable({
-    name: 'books_genres',
-    joinColumn: { name: 'book_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'genre_id', referencedColumnName: 'id' },
-  })
-  genres: Genre[];
-
-  @OneToMany(() => Chapter, (ch) => ch.book)
-  chapters: Chapter[];
 }

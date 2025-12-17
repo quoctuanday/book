@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-
 import { Genre } from '../entities/genre.entity';
 import { GenreAggregate } from '../domain/genre.aggregate';
 import { IGenreRepository } from '../domain/genre.repository.interface';

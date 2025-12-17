@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateBookDto {
   @IsNotEmpty()
@@ -11,5 +17,9 @@ export class CreateBookDto {
 
   @IsOptional()
   @MaxLength(1000)
-  coverImage?: string;
+  coverUrl?: string;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  genreIds: string[];
 }

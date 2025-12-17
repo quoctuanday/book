@@ -5,9 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-  OneToMany,
 } from 'typeorm';
-import { Book } from 'src/domains/books/entities/book.entity';
 import { UserAggregate } from 'src/domains/users/domain/user.aggregate';
 
 @Entity({ name: 'users' })
@@ -50,9 +48,6 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @OneToMany(() => Book, (book) => book.author)
-  books: Book[];
 
   toAggregate(): UserAggregate {
     return UserAggregate.reconstitute({

@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
   JoinColumn,
   Index,
 } from 'typeorm';
@@ -22,7 +21,6 @@ export class Chapter {
   @Column({ name: 'book_id', type: 'char', length: 36 })
   bookId: string;
 
-  @ManyToOne(() => Book, (b) => b.chapters, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'book_id' })
   book: Book;
 

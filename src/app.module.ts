@@ -8,12 +8,14 @@ import { DatabaseModule } from 'src/common/config/database/database.module';
 import { AuthModule } from 'src/domains/auth/auth.module';
 import { RedisModule } from 'src/common/config/redis/redis.module';
 import { GenresModule } from 'src/domains/genre/genres.module';
+import { BooksModule } from 'src/domains/books/books.module';
 
 @Module({
   imports: [
     CoreModule,
     AuthModule,
     UsersModule,
+    BooksModule,
     GenresModule,
     RedisModule,
     ConfigModule.forRoot({

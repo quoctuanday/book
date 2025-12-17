@@ -1,11 +1,14 @@
+import { slugify } from 'src/common/utils/slugify';
+
 export type BookStatus = 'draft' | 'ongoing' | 'completed' | 'hiatus';
 
 export class BookAggregate {
   private constructor(
     private _id: string | null,
     private _title: string,
+    private _slug: string,
     private _description?: string,
-    private _coverImage?: string,
+    private _coverUrl?: string,
     private _authorId?: string,
     private _status: BookStatus = 'draft',
     private _createdAt?: Date,
@@ -15,16 +18,18 @@ export class BookAggregate {
   static createNew(params: {
     title: string;
     description?: string;
-    coverImage?: string;
+    coverUrl?: string;
     authorId: string;
   }) {
     const now = new Date();
+    const slug = slugify(params.title);
 
     return new BookAggregate(
       null,
       params.title,
+      slug,
       params.description,
-      params.coverImage,
+      params.coverUrl,
       params.authorId,
       'draft',
       now,
@@ -35,8 +40,9 @@ export class BookAggregate {
   static reconstitute(props: {
     id: string;
     title: string;
+    slug: string;
     description?: string;
-    coverImage?: string;
+    coverUrl?: string;
     authorId?: string;
     status: BookStatus;
     createdAt: Date;
@@ -45,8 +51,9 @@ export class BookAggregate {
     return new BookAggregate(
       props.id,
       props.title,
+      props.slug,
       props.description,
-      props.coverImage,
+      props.coverUrl,
       props.authorId,
       props.status,
       props.createdAt,
@@ -62,6 +69,10 @@ export class BookAggregate {
     return this._title;
   }
 
+  get slug() {
+    return this._slug;
+  }
+
   get status() {
     return this._status;
   }
@@ -73,12 +84,20 @@ export class BookAggregate {
   updateInfo(params: {
     title?: string;
     description?: string;
-    coverImage?: string;
+    coverUrl?: string;
   }) {
-    if (params.title !== undefined) this._title = params.title;
-    if (params.description !== undefined)
+    if (params.title !== undefined) {
+      this._title = params.title;
+      this._slug = slugify(params.title);
+    }
+
+    if (params.description !== undefined) {
       this._description = params.description;
-    if (params.coverImage !== undefined) this._coverImage = params.coverImage;
+    }
+
+    if (params.coverUrl !== undefined) {
+      this._coverUrl = params.coverUrl;
+    }
 
     this.touch();
   }
@@ -90,25 +109,25 @@ export class BookAggregate {
   }
 
   complete() {
-    if (this._status !== 'ongoing')
+    if (this._status !== 'ongoing') {
       throw new Error('Only ongoing book can be completed');
-
+    }
     this._status = 'completed';
     this.touch();
   }
 
   pause() {
-    if (this._status !== 'ongoing')
+    if (this._status !== 'ongoing') {
       throw new Error('Only ongoing book can be paused');
-
+    }
     this._status = 'hiatus';
     this.touch();
   }
 
   resume() {
-    if (this._status !== 'hiatus')
+    if (this._status !== 'hiatus') {
       throw new Error('Only hiatus book can be resumed');
-
+    }
     this._status = 'ongoing';
     this.touch();
   }
@@ -121,8 +140,9 @@ export class BookAggregate {
     return {
       id: this._id,
       title: this._title,
+      slug: this._slug,
       description: this._description,
-      coverImage: this._coverImage,
+      coverUrl: this._coverUrl,
       authorId: this._authorId,
       status: this._status,
       createdAt: this._createdAt,
@@ -134,8 +154,9 @@ export class BookAggregate {
     return {
       id: this._id,
       title: this._title,
+      slug: this._slug,
       description: this._description,
-      coverImage: this._coverImage,
+      coverUrl: this._coverUrl,
       authorId: this._authorId,
       status: this._status,
       createdAt: this._createdAt,
