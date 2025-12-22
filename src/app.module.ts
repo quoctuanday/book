@@ -9,6 +9,7 @@ import { AuthModule } from 'src/domains/auth/auth.module';
 import { RedisModule } from 'src/common/config/redis/redis.module';
 import { GenresModule } from 'src/domains/genre/genres.module';
 import { BooksModule } from 'src/domains/books/books.module';
+import { ChaptersModule } from 'src/domains/chapters/chapters.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BooksModule } from 'src/domains/books/books.module';
     UsersModule,
     BooksModule,
     GenresModule,
+    ChaptersModule,
     RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
